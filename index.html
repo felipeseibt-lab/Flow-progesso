@@ -124,6 +124,7 @@
   input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--text); cursor:pointer; border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:background 0.15s; }
   input[type=range]:hover::-webkit-slider-thumb { background:var(--blue); }
 
+
   .pct-field { display:flex; align-items:center; gap:3px; flex-shrink:0; }
   .pct-input { width:50px; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; text-align:right; border:1px solid var(--border); border-radius:6px; padding:4px 6px; background:var(--surface2); color:var(--text); transition:border-color 0.12s; -moz-appearance:textfield; }
   .pct-input::-webkit-inner-spin-button, .pct-input::-webkit-outer-spin-button { -webkit-appearance:none; }
@@ -207,6 +208,83 @@
   .subtask-notes-textarea::placeholder { color:var(--text-3); }
   .subtask-saved { font-size:11px; color:var(--green); opacity:0; transition:opacity 0.3s; display:flex; align-items:center; justify-content:flex-end; gap:4px; margin-top:8px; }
   .subtask-saved.show { opacity:1; }
+
+
+  /* ── Stepper ── */
+  .stepper-wrap {
+    border-top: 1px solid var(--border);
+    padding: 10px 14px 12px;
+    background: var(--surface);
+    overflow-x: auto;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 560px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    gap: 5px;
+  }
+  /* connector line between steps */
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--border-strong);
+    z-index: 0;
+    transition: background 0.3s;
+  }
+  .step.done:not(:last-child)::after,
+  .step.active:not(:last-child)::after {
+    background: var(--green);
+  }
+  .step-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .step-dot svg { width: 10px; height: 10px; display: none; }
+  .step.done .step-dot {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .step.done .step-dot svg { display: block; }
+  .step.active .step-dot {
+    background: var(--blue);
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px #1558a820;
+  }
+  .step-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-3);
+    text-align: center;
+    line-height: 1.3;
+    max-width: 72px;
+    transition: color 0.2s;
+    user-select: none;
+  }
+  .step.done .step-label { color: var(--green); }
+  .step.active .step-label { color: var(--blue); font-weight: 600; }
+  .step:hover .step-dot { border-color: var(--blue); }
+  .step:hover .step-label { color: var(--text-2); }
+  .step.active:hover .step-label { color: var(--blue); }
+  .step.done:hover .step-label { color: var(--green); }
 
   footer { margin-top:2rem; font-size:12px; color:var(--text-3); text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; }
   footer svg { width:14px; height:14px; opacity:0.5; }
@@ -309,7 +387,8 @@ async function loadFromSupabase() {
     group_name: row.group_name || row.tag || '',
     name:       row.name || '',
     url:        row.url  || '',
-    pct:        row.pct  || 0,
+    pct:        snapToPct(row.pct  || 0),
+    stage:      row.stage ?? -1,
     notes: {
       mcps_new:      row.mcps_new      || '',
       mcps_existing: row.mcps_existing || '',
@@ -338,7 +417,8 @@ async function saveFlow(i) {
         body: JSON.stringify({
           name:f.name, pct:f.pct, url:f.url,
           mcps_new:f.notes.mcps_new, mcps_existing:f.notes.mcps_existing,
-          changes:f.notes.changes, tags:JSON.stringify(f.notes.tags)
+          changes:f.notes.changes, tags:JSON.stringify(f.notes.tags),
+          stage: f.stage ?? -1
         })
       });
       setSyncStatus('synced','Salvo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
@@ -469,6 +549,58 @@ function buildSubtasksPanel(flowIdx) {
     </div>`;
 }
 
+
+const STAGES = [
+  'Identificação\ndos MCPs',
+  'Desenhar\nno Flow',
+  'Aguardando\nMCP',
+  'Adição de\nvariáveis',
+  'Testando',
+  'Demo',
+  'Pronto'
+];
+
+const PCT_STEPS = [0, 10, 20, 40, 60, 80, 90, 100];
+const PCT_LABELS = ['—', '10%', '20%', '40%', '60%', '80%', '90%', '100%'];
+
+function snapToPct(v) {
+  // Snap to nearest allowed value
+  return PCT_STEPS.reduce((a, b) => Math.abs(b - v) < Math.abs(a - v) ? b : a);
+}
+
+function pctToStage(pct) {
+  if (pct === 0)   return -1; // hidden
+  if (pct === 10)  return 0;  // Identificação dos MCPs
+  if (pct === 20)  return 1;  // Desenhar no Flow
+  if (pct === 40)  return 2;  // Aguardando MCP
+  if (pct === 60)  return 3;  // Adição de variáveis
+  if (pct === 80)  return 4;  // Testando
+  if (pct === 90)  return 5;  // Demo
+  if (pct === 100) return 6;  // Pronto
+  return -1;
+}
+
+function buildStepper(i) {
+  const pct = data[i].pct || 0;
+  const stage = pctToStage(pct);
+
+  // Hide stepper when pct is 0
+  if (stage === -1) return `<div class="stepper-wrap stepper-hidden" data-i="${i}" style="display:none"></div>`;
+
+  const steps = STAGES.map((label, s) => {
+    let cls = '';
+    if (s < stage) cls = 'done';
+    else if (s === stage) cls = 'active';
+    const check = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>`;
+    return `
+      <div class="step ${cls}" data-i="${i}" data-stage="${s}">
+        <div class="step-dot">${check}</div>
+        <span class="step-label">${label}</span>
+      </div>`;
+  }).join('');
+  return `<div class="stepper-wrap" data-i="${i}"><div class="stepper">${steps}</div></div>`;
+}
+
 function render() {
   const container = document.getElementById('groups-container');
   container.innerHTML = '';
@@ -538,12 +670,12 @@ function render() {
           <span class="priority-badge${groupPos<3?' top3':''}" id="pbadge-${f.flow_index}">#${groupPos+1}</span>
           ${numEl}
           <input class="flow-name-input" type="text" value="${f.name.replace(/"/g,'&quot;')}" data-i="${i}" />
-          <input type="range" min="0" max="100" step="5" value="${f.pct}" data-i="${i}" class="range-input" />
+          <input type="range" min="0" max="100" step="10" value="${f.pct}" data-i="${i}" class="range-input" />
           <div class="mini-bar-wrap">
             <div class="mini-bar" id="mbar-${i}" style="width:${f.pct}%;background:${barColor(f.pct)}"></div>
           </div>
           <div class="pct-field">
-            <input class="pct-input" type="number" min="0" max="100" step="1" value="${f.pct}" data-i="${i}" />
+            <input class="pct-input" type="number" min="0" max="100" step="10" value="${f.pct}" data-i="${i}" />
             <span class="pct-sym">%</span>
           </div>
           <div id="pill-${i}">${pillHTML(f.pct)}</div>
@@ -555,6 +687,7 @@ function render() {
             </button>
           </div>
         </div>
+        ${buildStepper(i)}
         ${buildSubtasksPanel(f.flow_index)}
         <div class="notes-panel" id="npanel-${i}">
           <div class="notes-grid">
@@ -676,15 +809,23 @@ function render() {
   });
 
   function updateFlow(i, v) {
-    v = Math.max(0,Math.min(100,v));
+    v = snapToPct(Math.max(0, Math.min(100, v)));
     data[i].pct = v;
-    document.getElementById(`mbar-${i}`).style.width = v+'%';
-    document.getElementById(`mbar-${i}`).style.background = barColor(v);
-    document.getElementById(`pill-${i}`).innerHTML = pillHTML(v);
-    const pi=document.querySelector(`.pct-input[data-i="${i}"]`);
-    const ri=document.querySelector(`.range-input[data-i="${i}"]`);
-    if(pi&&+pi.value!==v) pi.value=v;
-    if(ri&&+ri.value!==v) ri.value=v;
+    const bar = document.getElementById(`mbar-${i}`);
+    if (bar) { bar.style.width = v+'%'; bar.style.background = barColor(v); }
+    const pill = document.getElementById(`pill-${i}`);
+    if (pill) pill.innerHTML = pillHTML(v);
+    const pi = document.querySelector(`.pct-input[data-i="${i}"]`);
+    const ri = document.querySelector(`.range-input[data-i="${i}"]`);
+    if (pi && +pi.value !== v) pi.value = v;
+    if (ri && +ri.value !== v) ri.value = v;
+    // Update stepper
+    const existingWrap = document.querySelector(`.stepper-wrap[data-i="${i}"]`);
+    if (existingWrap) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = buildStepper(i);
+      existingWrap.replaceWith(tmp.firstElementChild);
+    }
     updateSummary(); saveFlow(i);
   }
   document.querySelectorAll('.pct-input').forEach(inp => {
@@ -734,6 +875,8 @@ function render() {
     });
   });
 
+  // Stepper is read-only — driven automatically by pct
+
   // ── Subtask events ──
   document.querySelectorAll('.subtask-name').forEach(inp => {
     inp.addEventListener('change', e => {
@@ -781,6 +924,7 @@ function refreshNotesBtn(i) {
   btn.classList.toggle('has-notes',hasNotes(data[i]));
   lbl.innerHTML=notesLabel(i);
 }
+
 
 // ── Realtime ──
 function connectRealtime() {
