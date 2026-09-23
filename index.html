@@ -18,7 +18,7 @@
     --orange:#b06010; --orange-bg:#fdf0db;
   }
   body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:2rem 1rem 4rem; }
-  .container { max-width:860px; margin:0 auto; }
+  .container { max-width:960px; margin:0 auto; }
 
   #loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:100; transition:opacity 0.3s; }
   #loading-overlay.hidden { opacity:0; pointer-events:none; }
@@ -286,6 +286,104 @@
   .step.active:hover .step-label { color: var(--blue); }
   .step.done:hover .step-label { color: var(--green); }
 
+  /* ── Busca ── */
+  .search-wrap { position:sticky; top:0; z-index:20; background:var(--bg); padding:8px 0 12px; margin-bottom:1rem; }
+  .search-box { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border-strong); border-radius:10px; padding:0 12px; transition:border-color 0.12s, box-shadow 0.12s; }
+  .search-box:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px #1558a820; }
+  .search-box svg { width:16px; height:16px; color:var(--text-3); flex-shrink:0; }
+  .search-input { flex:1; min-width:0; border:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:14px; padding:11px 0; color:var(--text); }
+  .search-input:focus { outline:none; }
+  .search-input::placeholder { color:var(--text-3); }
+  .search-clear { display:none; border:none; background:none; color:var(--text-3); cursor:pointer; font-size:18px; line-height:1; padding:4px; }
+  .search-clear.show { display:block; }
+  .search-clear:hover { color:var(--text); }
+  .search-meta { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .filter-chip { font-size:11px; font-weight:500; padding:3px 10px; border-radius:99px; border:1px solid var(--border); background:var(--surface); color:var(--text-2); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.12s; }
+  .filter-chip:hover { border-color:var(--border-strong); color:var(--text); }
+  .filter-chip.active { background:var(--text); color:#fff; border-color:var(--text); }
+  .search-result { margin-left:auto; font-size:12px; color:var(--text-3); }
+  .search-empty { display:none; background:var(--surface); border:1px dashed var(--border-strong); border-radius:10px; padding:18px; text-align:center; font-size:13px; color:var(--text-2); line-height:1.6; margin-bottom:1.5rem; }
+  .search-empty.show { display:block; }
+  mark.hl { background:#ffe9a8; color:inherit; border-radius:2px; padding:0 1px; }
+
+  /* ── MCPs ── */
+  .mcp-btn { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:500; color:var(--text-3); background:none; border:1px solid var(--border); cursor:pointer; padding:4px 10px; border-radius:6px; transition:background 0.12s,color 0.12s,border-color 0.12s; flex-shrink:0; font-family:'DM Sans',sans-serif; }
+  .mcp-btn:hover { background:var(--blue-bg); color:var(--blue); border-color:#a9c6ec; }
+  .mcp-btn.has-mcps { color:var(--blue); border-color:#a9c6ec; }
+  .mcp-btn.open { color:var(--blue); border-color:#a9c6ec; background:var(--blue-bg); }
+  .mcp-btn svg { width:13px; height:13px; transition:transform 0.2s; flex-shrink:0; }
+  .mcp-btn.open svg.chevron { transform:rotate(180deg); }
+  .mcp-count { font-family:'DM Mono',monospace; font-size:10px; padding:1px 6px; border-radius:99px; background:var(--surface2); color:var(--text-2); }
+  .mcp-count.all-done { background:var(--green-bg); color:var(--green); }
+
+  .mcp-panel { display:none; border-top:1px solid var(--border); background:#f7f9fc; padding:10px 0 12px; }
+  .mcp-panel.open { display:block; animation:slideDown 0.18s ease; }
+  .mcp-list { display:flex; flex-direction:column; gap:6px; padding:0 14px; }
+  .mcp-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 0 12px; }
+  .mcp-box .mcp-row { background:#fcfcfa; }
+  .section-count { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); }
+  .section-hint { font-size:12px; color:var(--text-2); margin:-4px 0 10px; }
+  .mcp-empty { font-size:12px; color:var(--text-3); padding:4px 2px; }
+
+  .mcp-row { border:1px solid var(--border); border-radius:9px; background:var(--surface); overflow:hidden; transition:border-color 0.15s; }
+  .mcp-row:hover { border-color:var(--border-strong); }
+  .mcp-main { display:flex; align-items:flex-start; gap:10px; padding:9px 12px; }
+  .mcp-id { position:relative; font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--blue); background:var(--blue-bg); border-radius:5px; padding:3px 7px; text-decoration:none; flex-shrink:0; margin-top:1px; transition:all 0.15s; }
+  .mcp-id:hover { background:var(--blue); color:#fff; }
+  .mcp-id:hover::after { content:"Abrir no Azure"; position:absolute; left:0; top:calc(100% + 5px); background:#1a1916; color:#fff; font-size:10px; font-weight:500; padding:3px 8px; border-radius:5px; white-space:nowrap; pointer-events:none; font-family:'DM Sans',sans-serif; z-index:10; }
+  .mcp-body { flex:1; min-width:0; }
+  .mcp-title { font-size:13px; font-weight:500; line-height:1.4; }
+  .mcp-summary { font-size:12px; color:var(--text-2); line-height:1.5; margin-top:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mcp-row.editing .mcp-summary { -webkit-line-clamp:unset; }
+  .mcp-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+  .mcp-chips:empty { display:none; }
+  .mini-chip { font-size:10px; font-weight:500; padding:2px 8px; border-radius:99px; background:var(--surface2); color:var(--text-2); display:inline-flex; align-items:center; gap:4px; }
+  .mini-chip.reuse { background:var(--purple-bg); color:var(--purple); }
+  .mini-chip.note { background:var(--orange-bg); color:var(--orange); }
+  .mini-chip button { border:none; background:none; color:inherit; cursor:pointer; font-size:12px; line-height:1; padding:0; opacity:0.6; }
+  .mini-chip button:hover { opacity:1; }
+  .mcp-side { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .mcp-status { -webkit-appearance:none; appearance:none; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; padding:3px 10px; border-radius:99px; border:1px solid transparent; cursor:pointer; text-align:center; }
+  .mcp-status:focus { outline:2px solid #1558a844; }
+  .st-done { background:var(--green-bg); color:var(--green); }
+  .st-val  { background:var(--orange-bg); color:var(--orange); }
+  .st-prog { background:var(--blue-bg); color:var(--blue); }
+  .st-todo { background:#f0efe9; color:var(--text-2); }
+  .mcp-more { display:flex; align-items:center; font-size:11px; color:var(--text-3); background:none; border:1px solid var(--border); cursor:pointer; padding:3px 7px; border-radius:5px; font-family:'DM Sans',sans-serif; transition:all 0.12s; }
+  .mcp-more:hover, .mcp-more.open { background:var(--surface2); color:var(--text-2); }
+  .mcp-more svg { width:11px; height:11px; transition:transform 0.2s; }
+  .mcp-more.open svg { transform:rotate(180deg); }
+
+  .mcp-edit { display:none; border-top:1px solid var(--border); padding:12px; background:#fafaf8; grid-template-columns:1fr 1fr; gap:10px 12px; }
+  .mcp-edit.open { display:grid; animation:slideDown 0.15s ease; }
+  .mcp-edit .full { grid-column:1 / -1; }
+  .mcp-edit label.lbl { display:block; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); margin-bottom:5px; }
+  .mcp-edit input[type=text], .mcp-edit select, .mcp-edit textarea { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:7px 9px; border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); }
+  .mcp-edit textarea { resize:vertical; min-height:56px; line-height:1.5; }
+  .mcp-edit input:focus, .mcp-edit select:focus, .mcp-edit textarea:focus { outline:none; border-color:var(--blue); }
+  .check-line { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text-2); cursor:pointer; padding-top:6px; }
+  .used-row { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+  .used-row select { width:auto; flex:1; min-width:160px; }
+
+  .mcp-add { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 14px 0; }
+  .mcp-add input, .mcp-add select { font-family:'DM Sans',sans-serif; font-size:12px; padding:6px 8px; border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); }
+  .mcp-add input:focus, .mcp-add select:focus { outline:none; border-color:var(--blue); }
+  .mcp-add .in-id { width:96px; font-family:'DM Mono',monospace; -moz-appearance:textfield; }
+  .mcp-add .in-id::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .mcp-add .in-title { flex:1; min-width:180px; }
+  .mcp-add .check-line { font-size:12px; padding-top:0; }
+  .mcp-add-btn { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; background:var(--text); color:#fff; border:none; border-radius:6px; padding:7px 12px; cursor:pointer; }
+  .mcp-add-btn:hover { background:#3a3934; }
+  .mcp-add-msg { flex-basis:100%; font-size:12px; color:var(--red); min-height:0; }
+  .mcp-add-msg:empty { display:none; }
+  .mcp-notice { font-size:12px; color:var(--red); background:var(--red-bg); border-radius:8px; padding:10px 12px; margin:0 14px; }
+
+  @media (max-width:600px) {
+    .mcp-main { flex-wrap:wrap; }
+    .mcp-side { width:100%; justify-content:flex-end; }
+    .mcp-edit { grid-template-columns:1fr; }
+  }
+
   footer { margin-top:2rem; font-size:12px; color:var(--text-3); text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; }
   footer svg { width:14px; height:14px; opacity:0.5; }
 </style>
@@ -313,7 +411,7 @@
       </div>
       <h1>Migração · Laisa Flow</h1>
     </div>
-    <p class="subtitle">Arraste o <strong style="font-weight:500">≡</strong> para reordenar por prioridade · clique no número para abrir no N8N · <strong style="font-weight:500">✎ Notas</strong> para MCPs</p>
+    <p class="subtitle">Arraste o <strong style="font-weight:500">≡</strong> para reordenar por prioridade · clique no número para abrir no N8N · <strong style="font-weight:500">⚙ MCPs</strong> para os cards do Azure de cada fluxo</p>
   </header>
 
   <div class="summary-grid">
@@ -333,7 +431,45 @@
     </div>
   </div>
 
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="search-input" class="search-input" type="search" autocomplete="off" placeholder="Buscar MCP ou fluxo — nº do card, nome, palavra-chave (ex.: 43679, canhoto, contatos)" />
+      <button class="search-clear" id="search-clear" title="Limpar busca">×</button>
+    </div>
+    <div class="search-meta">
+      <button class="filter-chip active" data-action="filter" data-v="all">Todos</button>
+      <button class="filter-chip" data-action="filter" data-v="Done">Pronto</button>
+      <button class="filter-chip" data-action="filter" data-v="Aguardando Validação">Em validação</button>
+      <button class="filter-chip" data-action="filter" data-v="Doing">Em desenvolvimento</button>
+      <button class="filter-chip" data-action="filter" data-v="Pendente">Pendente</button>
+      <span class="search-result" id="search-result"></span>
+    </div>
+  </div>
+
+  <div class="search-empty" id="search-empty"></div>
+
   <div id="groups-container"></div>
+
+  <div class="group" id="mcp-reuse-group">
+    <div class="section-header">
+      <span class="section-tag" style="background:var(--purple-bg);color:var(--purple)">MCPs REUTILIZÁVEIS</span>
+      <span class="section-count" id="reuse-count"></span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-hint">Tools genéricas que servem para mais de um fluxo. Consulte aqui antes de abrir um card novo.</p>
+    <div class="mcp-box" id="mcp-reuse-box"></div>
+  </div>
+
+  <div class="group" id="mcp-orphan-group">
+    <div class="section-header">
+      <span class="section-tag" style="background:var(--orange-bg);color:var(--orange)">MCPs SEM FLUXO DEFINIDO</span>
+      <span class="section-count" id="orphan-count"></span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-hint">Cards que ainda não têm fluxo. Abra o <strong style="font-weight:500">⋯</strong> do card e escolha o fluxo.</p>
+    <div class="mcp-box" id="mcp-orphan-box"></div>
+  </div>
 
   <footer>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -681,6 +817,10 @@ function render() {
           <div id="pill-${i}">${pillHTML(f.pct)}</div>
           <div class="btn-row">
             ${subtasksBtnHTML}
+            <button class="mcp-btn" id="mcpbtn-${f.flow_index}" data-action="toggle-mcp" data-fi="${f.flow_index}" title="Cards de MCP no Azure">
+              ⚙ MCPs <span class="mcp-count" id="mcpcount-${f.flow_index}">0</span>
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
             <button class="notes-btn${hasNotes(f)?' has-notes':''}" id="nbtn-${i}" data-i="${i}">
               <span id="nlabel-${i}">${notesLabel(i)}</span>
               <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
@@ -689,6 +829,7 @@ function render() {
         </div>
         ${buildStepper(i)}
         ${buildSubtasksPanel(f.flow_index)}
+        <div class="mcp-panel" id="mcppanel-${f.flow_index}"></div>
         <div class="notes-panel" id="npanel-${i}">
           <div class="notes-grid">
             <div class="notes-field">
@@ -877,6 +1018,8 @@ function render() {
 
   // Stepper is read-only — driven automatically by pct
 
+  renderMcp();
+
   // ── Subtask events ──
   document.querySelectorAll('.subtask-name').forEach(inp => {
     inp.addEventListener('change', e => {
@@ -926,6 +1069,418 @@ function refreshNotesBtn(i) {
 }
 
 
+// ── MCPs (cards do Azure DevOps) ──
+const AZURE_WI_URL = 'https://dev.azure.com/lincros-sa/Laisa%20Flow/_workitems/edit/';
+// Valores iguais ao campo State do Azure, para não precisar de de/para
+const MCP_STATES = [
+  { v:'Pendente',             label:'Pendente',           cls:'st-todo' },
+  { v:'Doing',                label:'Em desenvolvimento', cls:'st-prog' },
+  { v:'Aguardando Validação', label:'Em validação',       cls:'st-val'  },
+  { v:'Done',                 label:'Pronto',             cls:'st-done' },
+];
+
+let mcpCards = [];
+let mcpTableOk = true;
+const openMcpPanels = new Set(); // flow_index com painel de MCPs aberto
+const openMcpEdits  = new Set(); // id de card com edição aberta
+let searchTerm = '';
+let statusFilter = 'all';
+let lastLocalMcpWrite = 0;
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function norm(s) { return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+function hora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function mcpById(id) { return mcpCards.find(c => c.id === id); }
+function flowByIndex(fi) { return data.find(f => f.flow_index === fi); }
+function flowName(fi) { const f = flowByIndex(fi); return f ? f.name.trim() : `Fluxo ${fi}`; }
+function stateInfo(v) { return MCP_STATES.find(s => s.v === v) || { v, label:v, cls:'st-todo' }; }
+function cardsForFlow(fi) { return mcpCards.filter(c => c.flow_index === fi || c.used_in.includes(fi)); }
+
+async function loadMcpCards() {
+  try {
+    const rows = await sbFetch('mcp_cards?order=azure_id.asc');
+    mcpCards = (rows || []).map(r => ({ ...r, used_in: r.used_in || [], notes: r.notes || '', summary: r.summary || '' }));
+    mcpTableOk = true;
+  } catch(e) {
+    mcpCards = [];
+    mcpTableOk = false;
+    console.warn('Tabela mcp_cards indisponível', e);
+  }
+}
+
+function stateOptions(current) {
+  const list = MCP_STATES.some(s => s.v === current) ? MCP_STATES : [...MCP_STATES, stateInfo(current)];
+  return list.map(s => `<option value="${esc(s.v)}"${s.v===current?' selected':''}>${esc(s.label)}</option>`).join('');
+}
+
+function flowOptions(selected, placeholder, exclude = []) {
+  const byTag = {};
+  data.forEach(f => {
+    if (exclude.includes(f.flow_index)) return;
+    const g = f.group_name || f.tag;
+    (byTag[g] = byTag[g] || []).push(f);
+  });
+  const groups = Object.entries(byTag).map(([g, flows]) =>
+    `<optgroup label="${esc(g)}">${flows.map(f =>
+      `<option value="${f.flow_index}"${f.flow_index===selected?' selected':''}>${esc(f.name.trim())}</option>`).join('')}</optgroup>`
+  ).join('');
+  return `<option value="">${esc(placeholder)}</option>${groups}`;
+}
+
+// ctx: flow_index do painel onde a linha aparece, 'reuse' ou 'orphan'
+function mcpRowHTML(c, ctx) {
+  const st = stateInfo(c.azure_state);
+  const chips = [];
+  if (c.reusable) chips.push(`<span class="mini-chip reuse">♻ Reutilizável</span>`);
+  if (typeof ctx === 'number' && c.flow_index !== ctx) {
+    chips.push(`<span class="mini-chip">Reutilizado de: ${esc(c.flow_index != null ? flowName(c.flow_index) : 'genérico')}</span>`);
+  }
+  if (ctx === 'reuse') {
+    chips.push(`<span class="mini-chip">Origem: ${esc(c.flow_index != null ? flowName(c.flow_index) : 'genérico')}</span>`);
+    c.used_in.forEach(fi => chips.push(`<span class="mini-chip">Usado em: ${esc(flowName(fi))}</span>`));
+  }
+  if (c.notes) chips.push(`<span class="mini-chip note" title="${esc(c.notes)}">✎ ${esc(c.notes.length > 60 ? c.notes.slice(0,60)+'…' : c.notes)}</span>`);
+
+  const editing = openMcpEdits.has(c.id);
+  const usedChips = c.used_in.map(fi =>
+    `<span class="mini-chip">${esc(flowName(fi))}<button data-action="rm-used" data-id="${c.id}" data-fi="${fi}" title="Tirar deste fluxo">×</button></span>`
+  ).join('');
+
+  return `
+    <div class="mcp-row${editing?' editing':''}" data-id="${c.id}">
+      <div class="mcp-main">
+        <a class="mcp-id" href="${AZURE_WI_URL}${c.azure_id}" target="_blank" rel="noopener">#${c.azure_id}</a>
+        <div class="mcp-body">
+          <div class="mcp-title" data-hl="${esc(c.title)}">${esc(c.title)}</div>
+          ${c.summary ? `<div class="mcp-summary" data-hl="${esc(c.summary)}">${esc(c.summary)}</div>` : ''}
+          <div class="mcp-chips">${chips.join('')}</div>
+        </div>
+        <div class="mcp-side">
+          <select class="mcp-status ${st.cls}" data-action="mcp-status" data-id="${c.id}" title="Status do card">${stateOptions(c.azure_state)}</select>
+          <button class="mcp-more${editing?' open':''}" data-action="mcp-more" data-id="${c.id}" title="Editar vínculo e observações">⋯
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="mcp-edit${editing?' open':''}">
+        <div>
+          <label class="lbl">Fluxo de origem</label>
+          <select data-action="mcp-flow" data-id="${c.id}">${flowOptions(c.flow_index, '— sem fluxo definido —')}</select>
+        </div>
+        <div>
+          <label class="lbl">Reutilização</label>
+          <label class="check-line"><input type="checkbox" data-action="mcp-reuse" data-id="${c.id}"${c.reusable?' checked':''} /> MCP reutilizável</label>
+        </div>
+        <div class="full">
+          <label class="lbl">Usado também em</label>
+          <div class="used-row">
+            ${usedChips}
+            <select data-action="mcp-add-used" data-id="${c.id}">${flowOptions(null, '+ usar em outro fluxo…', [c.flow_index, ...c.used_in])}</select>
+          </div>
+        </div>
+        <div class="full">
+          <label class="lbl">Título</label>
+          <input type="text" data-action="mcp-text" data-field="title" data-id="${c.id}" value="${esc(c.title)}" />
+        </div>
+        <div class="full">
+          <label class="lbl">O que faz</label>
+          <textarea data-action="mcp-text" data-field="summary" data-id="${c.id}" placeholder="Resumo de uma linha do que o MCP faz">${esc(c.summary)}</textarea>
+        </div>
+        <div class="full">
+          <label class="lbl">Observações</label>
+          <textarea data-action="mcp-text" data-field="notes" data-id="${c.id}" placeholder="Pendências, dependências, dúvidas…">${esc(c.notes)}</textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addFormHTML(fi, reusable) {
+  return `
+    <div class="mcp-add" data-fi="${fi ?? ''}">
+      <input class="in-id" name="azure_id" type="number" min="1" placeholder="Nº Azure" />
+      <input class="in-title" name="title" type="text" placeholder="Título do card (ex.: Consultar notas em atraso no TMS)" />
+      <select name="state">${stateOptions('Pendente')}</select>
+      <label class="check-line"><input type="checkbox" name="reusable"${reusable?' checked':''} /> Reutilizável</label>
+      <button class="mcp-add-btn" data-action="mcp-add">+ Adicionar card</button>
+      <div class="mcp-add-msg"></div>
+    </div>`;
+}
+
+function renderMcp() {
+  const notice = mcpTableOk ? '' :
+    `<div class="mcp-notice">Tabela <code>mcp_cards</code> não encontrada no Supabase. Rode o script de criação para habilitar os cards de MCP.</div>`;
+
+  data.forEach(f => {
+    const fi = f.flow_index;
+    const panel = document.getElementById(`mcppanel-${fi}`);
+    if (!panel) return;
+    const cards = cardsForFlow(fi);
+    panel.innerHTML = mcpTableOk
+      ? `<div class="mcp-list">${cards.length ? cards.map(c => mcpRowHTML(c, fi)).join('') : '<div class="mcp-empty">Nenhum card de MCP vinculado a este fluxo ainda.</div>'}</div>${addFormHTML(fi, false)}`
+      : notice;
+    const done = cards.filter(c => c.azure_state === 'Done').length;
+    const count = document.getElementById(`mcpcount-${fi}`);
+    if (count) {
+      count.textContent = cards.length ? `${done}/${cards.length}` : '0';
+      count.classList.toggle('all-done', cards.length > 0 && done === cards.length);
+    }
+    const btn = document.getElementById(`mcpbtn-${fi}`);
+    if (btn) btn.classList.toggle('has-mcps', cards.length > 0);
+  });
+
+  const reuse = mcpCards.filter(c => c.reusable);
+  document.getElementById('mcp-reuse-box').innerHTML = mcpTableOk
+    ? `<div class="mcp-list">${reuse.length ? reuse.map(c => mcpRowHTML(c, 'reuse')).join('') : '<div class="mcp-empty">Nenhum MCP marcado como reutilizável.</div>'}</div>${addFormHTML(null, true)}`
+    : notice;
+  document.getElementById('reuse-count').textContent = mcpTableOk ? reuse.length : '';
+
+  const orphan = mcpCards.filter(c => c.flow_index == null && !c.reusable);
+  document.getElementById('mcp-orphan-box').innerHTML = mcpTableOk
+    ? `<div class="mcp-list">${orphan.length ? orphan.map(c => mcpRowHTML(c, 'orphan')).join('') : '<div class="mcp-empty">Todos os cards já têm fluxo. 🎉</div>'}</div>`
+    : notice;
+  document.getElementById('orphan-count').textContent = mcpTableOk ? orphan.length : '';
+
+  applySearch();
+}
+
+// ── Busca ──
+function searchWords() { return norm(searchTerm).split(/\s+/).filter(Boolean); }
+function textMatches(text, words) { const t = norm(text); return words.every(w => t.includes(w)); }
+function cardMatches(c, words) {
+  if (statusFilter !== 'all' && c.azure_state !== statusFilter) return false;
+  if (!words.length) return true;
+  const flows = [c.flow_index, ...c.used_in].filter(fi => fi != null).map(flowName).join(' ');
+  return textMatches(`${c.azure_id} #${c.azure_id} ${c.title} ${c.summary} ${c.notes} ${flows}`, words);
+}
+function highlight(raw, words) {
+  let html = esc(raw);
+  if (!words.length) return html;
+  // Destaque simples (sem acento); a busca em si já ignora acentos
+  const re = new RegExp('(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')', 'gi');
+  return html.replace(/(<[^>]*>)|([^<]+)/g, (m, tag, text) => tag || text.replace(re, '<mark class="hl">$1</mark>'));
+}
+
+function applySearch() {
+  const words = searchWords();
+  const active = words.length > 0 || statusFilter !== 'all';
+  const foundCards = new Set();
+  let flowsShown = 0;
+
+  document.querySelectorAll('#groups-container .flow-card').forEach(card => {
+    const fi = +card.dataset.flowIndex;
+    const f = flowByIndex(fi);
+    const rows = [...card.querySelectorAll('.mcp-row')];
+    let anyRow = false;
+    rows.forEach(r => {
+      const c = mcpById(+r.dataset.id);
+      const m = c && cardMatches(c, words);
+      if (active && m) { anyRow = true; foundCards.add(c.id); }
+      r.style.display = (!active || m) ? '' : 'none';
+    });
+    const nameMatch = words.length > 0 && statusFilter === 'all' && f && textMatches(f.name, words);
+    if (nameMatch && !anyRow) rows.forEach(r => r.style.display = '');
+    const show = !active || anyRow || nameMatch;
+    card.style.display = show ? '' : 'none';
+    if (show) flowsShown++;
+    const open = openMcpPanels.has(fi) || (active && anyRow);
+    card.querySelector('.mcp-panel')?.classList.toggle('open', open);
+    card.querySelector('.mcp-btn')?.classList.toggle('open', open);
+  });
+
+  document.querySelectorAll('#groups-container .group').forEach(g => {
+    const visible = [...g.querySelectorAll('.flow-card')].some(c => c.style.display !== 'none');
+    g.style.display = visible ? '' : 'none';
+  });
+
+  ['mcp-reuse-group', 'mcp-orphan-group'].forEach(id => {
+    const g = document.getElementById(id);
+    let any = false;
+    g.querySelectorAll('.mcp-row').forEach(r => {
+      const c = mcpById(+r.dataset.id);
+      const m = c && cardMatches(c, words);
+      if (active && m) { any = true; foundCards.add(c.id); }
+      r.style.display = (!active || m) ? '' : 'none';
+    });
+    g.style.display = (!active || any) ? '' : 'none';
+  });
+
+  document.querySelectorAll('[data-hl]').forEach(el => { el.innerHTML = highlight(el.dataset.hl, words); });
+
+  const res = document.getElementById('search-result');
+  res.textContent = active
+    ? `${foundCards.size} MCP${foundCards.size===1?'':'s'} · ${flowsShown} fluxo${flowsShown===1?'':'s'}`
+    : (mcpTableOk ? `${mcpCards.length} cards de MCP cadastrados` : '');
+
+  const empty = document.getElementById('search-empty');
+  const nothing = active && foundCards.size === 0 && flowsShown === 0;
+  empty.classList.toggle('show', nothing);
+  if (nothing) {
+    empty.innerHTML = words.length
+      ? `Nenhum MCP encontrado para <strong>“${esc(searchTerm.trim())}”</strong>.<br>Se ele ainda não existe, abra o card no Azure e cadastre em <strong>⚙ MCPs</strong> no fluxo correspondente.`
+      : `Nenhum MCP com esse status.`;
+  }
+}
+
+// ── Gravação ──
+function saveMcp(id, patch, delay = 0) {
+  const c = mcpById(id);
+  if (!c) return;
+  Object.assign(c, patch);
+  c._pending = { ...(c._pending || {}), ...patch };
+  clearTimeout(saveTimers['m'+id]);
+  saveTimers['m'+id] = setTimeout(async () => {
+    const body = c._pending; c._pending = {};
+    lastLocalMcpWrite = Date.now();
+    setSyncStatus('syncing','Salvando…');
+    try {
+      await sbFetch(`mcp_cards?id=eq.${id}`, {
+        method:'PATCH', prefer:'return=minimal',
+        body: JSON.stringify({ ...body, updated_at: new Date().toISOString() })
+      });
+      setSyncStatus('synced','Salvo · '+hora());
+    } catch(e) { setSyncStatus('error','Erro ao salvar'); console.error(e); }
+  }, delay);
+}
+
+async function addMcp(form) {
+  const msg = form.querySelector('.mcp-add-msg');
+  const say = t => { msg.textContent = t; };
+  const azureId = parseInt(form.querySelector('[name=azure_id]').value, 10);
+  const title = form.querySelector('[name=title]').value.trim();
+  const state = form.querySelector('[name=state]').value;
+  const reusable = form.querySelector('[name=reusable]').checked;
+  const fi = form.dataset.fi === '' ? null : +form.dataset.fi;
+  if (!azureId) return say('Informe o número do card no Azure.');
+  if (!title) return say('Informe o título do card.');
+  const dup = mcpCards.find(c => c.azure_id === azureId);
+  if (dup) {
+    return say(`O card #${azureId} já está cadastrado ${dup.flow_index != null ? `no fluxo “${flowName(dup.flow_index)}”` : (dup.reusable ? 'nos reutilizáveis' : 'sem fluxo')}.`);
+  }
+  say('');
+  lastLocalMcpWrite = Date.now();
+  setSyncStatus('syncing','Salvando…');
+  try {
+    const rows = await sbFetch('mcp_cards', {
+      method:'POST', prefer:'return=representation',
+      body: JSON.stringify({ azure_id:azureId, title, azure_state:state, flow_index:fi, reusable })
+    });
+    const r = rows[0];
+    mcpCards.push({ ...r, used_in: r.used_in || [], notes: r.notes || '', summary: r.summary || '' });
+    mcpCards.sort((a, b) => a.azure_id - b.azure_id);
+    if (fi != null) openMcpPanels.add(fi);
+    renderMcp();
+    setSyncStatus('synced','Card #'+azureId+' adicionado · '+hora());
+  } catch(e) {
+    setSyncStatus('error','Erro ao salvar');
+    say('Não foi possível salvar o card. Tente de novo.');
+    console.error(e);
+  }
+}
+
+// ── Eventos (delegados, sobrevivem aos re-renders) ──
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-action]');
+  if (!t) return;
+  const id = +t.dataset.id;
+  switch (t.dataset.action) {
+    case 'toggle-mcp': {
+      const fi = +t.dataset.fi;
+      const panel = document.getElementById(`mcppanel-${fi}`);
+      const open = !panel.classList.contains('open');
+      if (open) openMcpPanels.add(fi); else openMcpPanels.delete(fi);
+      panel.classList.toggle('open', open);
+      t.classList.toggle('open', open);
+      break;
+    }
+    case 'mcp-more': {
+      const row = t.closest('.mcp-row');
+      const open = !openMcpEdits.has(id);
+      if (open) openMcpEdits.add(id); else openMcpEdits.delete(id);
+      // O mesmo card pode aparecer em mais de um lugar (fluxo + reutilizáveis)
+      row.classList.toggle('editing', open);
+      row.querySelector('.mcp-edit').classList.toggle('open', open);
+      t.classList.toggle('open', open);
+      break;
+    }
+    case 'rm-used': {
+      const c = mcpById(id);
+      saveMcp(id, { used_in: c.used_in.filter(fi => fi !== +t.dataset.fi) });
+      renderMcp();
+      break;
+    }
+    case 'mcp-add':
+      addMcp(t.closest('.mcp-add'));
+      break;
+    case 'filter':
+      statusFilter = t.dataset.v;
+      document.querySelectorAll('.filter-chip').forEach(ch => ch.classList.toggle('active', ch === t));
+      applySearch();
+      break;
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  const id = +t.dataset.id;
+  switch (t.dataset.action) {
+    case 'mcp-status':
+      saveMcp(id, { azure_state: t.value });
+      renderMcp();
+      break;
+    case 'mcp-flow':
+      saveMcp(id, { flow_index: t.value === '' ? null : +t.value });
+      renderMcp();
+      break;
+    case 'mcp-reuse':
+      saveMcp(id, { reusable: t.checked });
+      renderMcp();
+      break;
+    case 'mcp-add-used':
+      if (t.value !== '') {
+        const c = mcpById(id);
+        saveMcp(id, { used_in: [...c.used_in, +t.value] });
+        renderMcp();
+      }
+      break;
+  }
+});
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.action !== 'mcp-text') return;
+  const id = +t.dataset.id;
+  const field = t.dataset.field;
+  saveMcp(id, { [field]: t.value }, 600);
+  // Atualiza o texto visível sem re-renderizar (não perde o foco)
+  if (field === 'title' || field === 'summary') {
+    document.querySelectorAll(`.mcp-row[data-id="${id}"] .mcp-${field}`).forEach(el => {
+      el.dataset.hl = t.value; el.textContent = t.value;
+    });
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.closest('.mcp-add') && e.target.tagName === 'INPUT') {
+    e.preventDefault();
+    addMcp(e.target.closest('.mcp-add'));
+  }
+});
+
+(() => {
+  const input = document.getElementById('search-input');
+  const clear = document.getElementById('search-clear');
+  let t;
+  input.addEventListener('input', () => {
+    clear.classList.toggle('show', !!input.value);
+    clearTimeout(t);
+    t = setTimeout(() => { searchTerm = input.value; applySearch(); }, 120);
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input')); } });
+  clear.addEventListener('click', () => { input.value = ''; input.dispatchEvent(new Event('input')); input.focus(); });
+})();
+
 // ── Realtime ──
 function connectRealtime() {
   const ws = new WebSocket(
@@ -940,13 +1495,32 @@ function connectRealtime() {
       payload: {},
       ref: '1'
     }));
+    ws.send(JSON.stringify({
+      topic: 'realtime:public:mcp_cards',
+      event: 'phx_join',
+      payload: {},
+      ref: '2'
+    }));
   };
 
+  let mcpReloadTimer;
   ws.onmessage = async (msg) => {
     const data_msg = JSON.parse(msg.data);
     // Ignore heartbeats and join confirmations
     if (!data_msg.payload || !data_msg.payload.type) return;
     const type = data_msg.payload.type; // INSERT, UPDATE, DELETE
+    if (data_msg.topic === 'realtime:public:mcp_cards') {
+      // Eco da própria gravação ou alguém digitando num card: não re-renderiza agora
+      clearTimeout(mcpReloadTimer);
+      mcpReloadTimer = setTimeout(async function reloadMcp() {
+        const typing = document.activeElement && document.activeElement.closest('.mcp-edit, .mcp-add');
+        if (Date.now() - lastLocalMcpWrite < 3000 || typing) { mcpReloadTimer = setTimeout(reloadMcp, 3000); return; }
+        await loadMcpCards();
+        renderMcp();
+        setSyncStatus('synced','Ao vivo · '+hora());
+      }, 400);
+      return;
+    }
     if (['INSERT','UPDATE','DELETE'].includes(type)) {
       // Reload data and re-render without showing loading overlay
       try {
@@ -981,7 +1555,7 @@ function connectRealtime() {
 (async () => {
   try {
     setSyncStatus('syncing','Carregando…');
-    await loadFromSupabase();
+    await Promise.all([loadFromSupabase(), loadMcpCards()]);
     setSyncStatus('synced','Sincronizado');
   } catch(e) {
     setSyncStatus('error','Erro de conexão');
