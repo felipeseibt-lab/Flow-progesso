@@ -286,6 +286,17 @@
   .step.active:hover .step-label { color: var(--blue); }
   .step.done:hover .step-label { color: var(--green); }
 
+  /* ── Grupos recolhíveis ── */
+  .group-toggle { width:100%; background:none; border:none; padding:2px 0; font:inherit; color:inherit; cursor:pointer; text-align:left; }
+  .group-toggle:hover .section-tag { filter:brightness(0.96); }
+  .group-toggle:focus-visible { outline:2px solid #1558a844; border-radius:6px; }
+  .group-chevron { width:14px; height:14px; color:var(--text-3); flex-shrink:0; transition:transform 0.2s; }
+  .group-toggle:hover .group-chevron { color:var(--text); }
+  .group.collapsed .group-chevron { transform:rotate(-90deg); }
+  .group.collapsed .flows-list { display:none; }
+  .group.collapsed { margin-bottom:0.75rem; }
+  .group-summary { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); white-space:nowrap; }
+
   /* ── Busca ── */
   .search-wrap { position:sticky; top:0; z-index:20; background:var(--bg); padding:8px 0 12px; margin-bottom:1rem; }
   .search-box { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border-strong); border-radius:10px; padding:0 12px; transition:border-color 0.12s, box-shadow 0.12s; }
@@ -682,6 +693,21 @@ function updateSummary() {
   document.getElementById('m-done').textContent  = data.filter(f=>f.pct===100).length;
   document.getElementById('m-prog').textContent  = data.filter(f=>f.pct>0&&f.pct<100).length;
   document.getElementById('m-todo').textContent  = data.filter(f=>f.pct===0).length;
+  document.querySelectorAll('.group[data-flow-group]').forEach(g => {
+    const flows = data.filter(f => (f.group_name||f.tag) === g.dataset.flowGroup);
+    const done = flows.filter(f => f.pct === 100).length;
+    g.querySelector('.group-summary').textContent =
+      `${flows.length} fluxo${flows.length===1?'':'s'} · ${done} concluído${done===1?'':'s'}`;
+  });
+}
+
+// ── Grupos recolhíveis ──
+// Ao abrir o painel: TMS aberto, demais (TRK, já concluídos) recolhidos.
+function isTmsGroup(name) { return /^TMS\b/i.test(name); }
+let collapsedGroups = null; // definido no primeiro render, a partir dos grupos existentes
+function initCollapsedGroups() {
+  if (collapsedGroups) return;
+  collapsedGroups = new Set([...new Set(data.map(f => f.group_name||f.tag))].filter(g => !isTmsGroup(g)));
 }
 
 // Update all priority badges and N8N number links after reorder
@@ -793,8 +819,11 @@ function buildStepper(i) {
 function render() {
   const container = document.getElementById('groups-container');
   container.innerHTML = '';
-  // Group by group_name, preserving priority order within each group
-  const groups = [...new Set(data.map(f=>f.group_name||f.tag))];
+  initCollapsedGroups();
+  // Group by group_name, preserving priority order within each group.
+  // Grupos do TMS primeiro (os do TRK já foram concluídos).
+  const groups = [...new Set(data.map(f=>f.group_name||f.tag))]
+    .sort((a, b) => isTmsGroup(b) - isTmsGroup(a));
 
   // Assign per-group position counters
   const groupCounters = {};
@@ -816,13 +845,16 @@ function render() {
     const groupFlows = data.map((f,i)=>({...f,idx:i})).filter(f=>(f.group_name||f.tag)===groupName);
     const gc = GROUP_COLORS[groupName] || {bg:'#f0efe9', color:'#6b6a64'};
     const group = document.createElement('div');
-    group.className = 'group';
+    group.className = 'group' + (collapsedGroups.has(groupName) ? ' collapsed' : '');
+    group.dataset.flowGroup = groupName;
     const safeId = groupName.replace(/[^a-zA-Z0-9]/g,'-');
     group.innerHTML = `
-      <div class="section-header">
+      <button class="section-header group-toggle" data-action="toggle-group" data-group="${groupName}" title="Recolher / expandir">
+        <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         <span class="section-tag" style="background:${gc.bg};color:${gc.color}">${groupName}</span>
+        <span class="group-summary"></span>
         <div class="section-line"></div>
-      </div>
+      </button>
       <div class="flows-list" id="group-${safeId}" data-group="${groupName}"></div>`;
     container.appendChild(group);
     const list = document.getElementById(`group-${safeId}`);
@@ -1345,6 +1377,8 @@ function applySearch() {
   document.querySelectorAll('#groups-container .group').forEach(g => {
     const visible = [...g.querySelectorAll('.flow-card')].some(c => c.style.display !== 'none');
     g.style.display = visible ? '' : 'none';
+    // Durante a busca, grupo recolhido abre para mostrar o resultado
+    g.classList.toggle('collapsed', !active && collapsedGroups.has(g.dataset.flowGroup));
   });
 
   ['mcp-reuse-group', 'mcp-orphan-group'].forEach(id => {
@@ -1466,6 +1500,13 @@ document.addEventListener('click', e => {
     case 'mcp-add':
       addMcp(t.closest('.mcp-add'));
       break;
+    case 'toggle-group': {
+      const g = t.dataset.group;
+      const collapse = !t.closest('.group').classList.contains('collapsed');
+      if (collapse) collapsedGroups.add(g); else collapsedGroups.delete(g);
+      t.closest('.group').classList.toggle('collapsed', collapse);
+      break;
+    }
     case 'filter':
       statusFilter = t.dataset.v;
       document.querySelectorAll('.filter-chip').forEach(ch => ch.classList.toggle('active', ch === t));
